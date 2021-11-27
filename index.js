@@ -1,8 +1,8 @@
 const puppeteer = require('puppeteer');
 
 (async () => {
-  const browser = await puppeteer.launch({ ignoreHTTPSErrors: true });
-  // const browser = await puppeteer.launch({ headless: false });
+  // const browser = await puppeteer.launch({ ignoreHTTPSErrors: true });
+  const browser = await puppeteer.launch({ ignoreHTTPSErrors: true, headless: false });
   const page = await browser.newPage();
   const navigationPromise = page.waitForNavigation();
 
@@ -47,8 +47,8 @@ const puppeteer = require('puppeteer');
 
   // console.log(linksList);
 
-  // for (let i = 0; i < linksList.length; i++) {
-  for (let i = 0; i < 1; i++) {
+  for (let i = 1; i < linksList.length; i++) {
+    // for (let i = 1; i < 2; i++) {
     const link = linksList[i];
     await page.goto(`${link.url}`);
     await navigationPromise;
@@ -87,6 +87,8 @@ const puppeteer = require('puppeteer');
       }
     }
 
+    await navigationPromise;
+
     for (let j = 0; j < lenDiscoursesResults; j++) {
       let link = discoursesResults[j];
       if (link.url != null && link.url != undefined) {
@@ -94,18 +96,19 @@ const puppeteer = require('puppeteer');
         await page.goto(`${link.url}`, { waitUntil: 'networkidle2' }).catch((e) => void 0);
         await navigationPromise;
 
-        await page.evaluate(() => {
+        let pagesToScrape = await page.evaluate(() => {
           // pegar o numero de paginas
-          if (document.querySelector('#content-core > ul > li:nth-last-child(2)') == null) {
+          if (document.querySelector('#content-core > ul > li:nth-last-child(2)')) {
+            return document.querySelector('#content-core > ul > li:nth-last-child(2)').innerText;
+          } else {
             return;
           }
-          pagesToScrape = document.querySelector(
-            '#content-core > ul > li:nth-last-child(2)'
-          ).innerText;
         });
+        // console.log('pagesToScrape:', pagesToScrape);
+
+        await navigationPromise;
 
         let currentPage = 1;
-        let pagesToScrape;
         let urls = [];
 
         if (!pagesToScrape) {
@@ -131,8 +134,7 @@ const puppeteer = require('puppeteer');
             ]);
           }
           currentPage++;
-          console.log(currentPage);
-          console.log(pagesToScrape);
+          console.log('currentPage:', currentPage);
 
           console.log(urls);
         }
