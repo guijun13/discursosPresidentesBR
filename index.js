@@ -20,6 +20,8 @@ const puppeteer = require('puppeteer');
   await page.waitForSelector(
     '#portal-sitemap > li:nth-child(10) > ul > li:nth-child(1) > ul > li > div'
   );
+
+  await navigationPromise;
   // await page.click('#portal-sitemap > li:nth-child(10) > ul > li:nth-child(1) > ul > li > div > a');
 
   // await page.waitForSelector(
@@ -47,7 +49,7 @@ const puppeteer = require('puppeteer');
 
   // console.log(linksList);
 
-  for (let i = 1; i < linksList.length; i++) {
+  for (let i = 13; i < linksList.length; i++) {
     // for (let i = 1; i < 2; i++) {
     const link = linksList[i];
     await page.goto(`${link.url}`);
@@ -63,9 +65,16 @@ const puppeteer = require('puppeteer');
             '#f84b41b10df14a67a7250c2b2bf06c07 > div > ul > li a'
           );
           itens.forEach((i) => {
-            yearsLinks.push({
-              url: i.href,
-            });
+            if (
+              i.href !=
+                'https://editarcms.presidencia.gov.br/cobib_idg/presidencia/ex-presidentes/costa-silva/resolveuid/5fc9a0e0f68f426f835db4398fd78bfc' &&
+              i.href !=
+                'https://editarcms.presidencia.gov.br/cobib_idg/presidencia/ex-presidentes/costa-silva/resolveuid/ad9e5d2925084ab89070a5d67e60d285'
+            ) {
+              yearsLinks.push({
+                url: i.href,
+              });
+            }
           });
           return yearsLinks;
         } else if (document.querySelector('#f84b41b10df14a67a7250c2b2bf06c07 > div a')) {
@@ -94,6 +103,7 @@ const puppeteer = require('puppeteer');
       if (link.url != null && link.url != undefined) {
         // console.log(`${link.url}`);
         await page.goto(`${link.url}`, { waitUntil: 'networkidle2' }).catch((e) => void 0);
+
         await navigationPromise;
 
         let pagesToScrape = await page.evaluate(() => {
@@ -126,19 +136,31 @@ const puppeteer = require('puppeteer');
             });
             return discourseArticleList;
           });
+
           urls = urls.concat(discourseList);
+
           if (currentPage < pagesToScrape) {
-            await Promise.all([
-              await page.click('#content-core > ul > li:last-child'),
-              await page.waitForSelector('#content-core a.summary.url'),
-            ]);
+            try {
+              await page.waitForSelector('#content-core > ul > li:last-child'),
+                await Promise.all([
+                  await page.click('#content-core > ul > li:last-child'),
+                  await page.waitForSelector('#content-core a.summary.url'),
+                ]);
+            } catch (error) {
+              return;
+            }
           }
           currentPage++;
-          console.log('currentPage:', currentPage);
+          // console.log('currentPage:', currentPage);
 
           console.log(urls);
         }
       }
+      await navigationPromise;
+
+      // for (let k = 0; k < urls.length; k++) {
+      //   let articleLink = urls[k];
+      // }
     }
   }
 
