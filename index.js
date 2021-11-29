@@ -3,8 +3,8 @@ const fs = require('fs');
 
 (async () => {
   let getDirName = require('path').dirname;
-  // const browser = await puppeteer.launch({ ignoreHTTPSErrors: true });
-  const browser = await puppeteer.launch({ ignoreHTTPSErrors: true, headless: false });
+  const browser = await puppeteer.launch({ ignoreHTTPSErrors: true });
+  // const browser = await puppeteer.launch({ ignoreHTTPSErrors: true, headless: false });
   const page = await browser.newPage();
   const navigationPromise = page.waitForNavigation();
 
@@ -162,23 +162,36 @@ const fs = require('fs');
       for (let k = 0; k < urls.length; k++) {
         let articleLink = urls[k];
 
-        await page.goto(`${articleLink}`, { waitUntil: 'networkidle2' }).catch((e) => void 0);
+        await page
+          .goto(`${articleLink}`, { waitUntil: 'networkidle2' })
+          .catch(async (e) => await page.reload(`${articleLink}`));
 
         await navigationPromise;
 
         let discourseData = await page.evaluate(async () => {
-          if (document.querySelector('#content-core > p > a')) {
-            // pdf
-            await page.click(document.querySelector('#content-core > p > a').href);
-          } else if (document.querySelector('#content-core div')) {
-            // texto no site
-            return {
-              title: document
-                .querySelector('#breadcrumbs-6')
-                .innerText.replace(/[^a-zA-Z0-9]/g, '')
-                .toLowerCase(),
-              discourseText: document.querySelector('#content-core div').innerText,
-            };
+          // await page.waitForSelector('#content-core > p > a');
+          try {
+            if (document.querySelector('#content-core > p > a')) {
+              // pdf
+              await page.click(document.querySelector('#content-core > p > a').href);
+              await navigationPromise;
+            } else if (document.querySelector('#content-core div')) {
+              // texto no site
+              return {
+                presidentName: document
+                  .querySelector('#breadcrumbs-3 a')
+                  .innerText.replace(/ /g, '')
+                  .toLowerCase(),
+                title: document
+                  .querySelector('#breadcrumbs-6')
+                  .innerText.replace(/[^a-zA-Z0-9]/g, '')
+                  .toLowerCase(),
+                discourseText: document.querySelector('#content-core div').innerText,
+              };
+            }
+          } catch (e) {
+            await page.reload(`${articleLink}`);
+            return;
           }
         });
 
@@ -200,7 +213,11 @@ const fs = require('fs');
           );
         }
 
-        writeFile('./discourses/' + discourseData.title + '_.txt', discourseData.discourseText, cb);
+        writeFile(
+          './speeches/' + discourseData.presidentName + '/' + discourseData.title + '_.txt',
+          discourseData.discourseText,
+          cb
+        );
       }
     }
   }
