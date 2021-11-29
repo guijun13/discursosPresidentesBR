@@ -1,6 +1,8 @@
 const puppeteer = require('puppeteer');
+const fs = require('fs');
 
 (async () => {
+  let getDirName = require('path').dirname;
   // const browser = await puppeteer.launch({ ignoreHTTPSErrors: true });
   const browser = await puppeteer.launch({ ignoreHTTPSErrors: true, headless: false });
   const page = await browser.newPage();
@@ -8,7 +10,7 @@ const puppeteer = require('puppeteer');
 
   // const url = `http://www.biblioteca.presidencia.gov.br/presidencia/ex-presidentes`;
   const url = `http://www.biblioteca.presidencia.gov.br/mapadosite`;
-  await page.goto(url);
+  await page.goto(url, { waitUntil: 'networkidle2' }).catch((e) => void 0);
 
   await navigationPromise;
 
@@ -49,10 +51,10 @@ const puppeteer = require('puppeteer');
 
   // console.log(linksList);
 
-  for (let i = 13; i < linksList.length; i++) {
+  for (let i = 0; i < linksList.length; i++) {
     // for (let i = 1; i < 2; i++) {
     const link = linksList[i];
-    await page.goto(`${link.url}`);
+    await page.goto(`${link.url}`, { waitUntil: 'networkidle2' }).catch((e) => void 0);
     await navigationPromise;
 
     const discoursesResults = await page.evaluate(() => {
@@ -100,67 +102,106 @@ const puppeteer = require('puppeteer');
 
     for (let j = 0; j < lenDiscoursesResults; j++) {
       let link = discoursesResults[j];
-      if (link.url != null && link.url != undefined) {
-        // console.log(`${link.url}`);
-        await page.goto(`${link.url}`, { waitUntil: 'networkidle2' }).catch((e) => void 0);
+      // if (link.url != null && link.url != undefined) {
+      // console.log(`${link.url}`);
+      await page.goto(`${link.url}`, { waitUntil: 'networkidle2' }).catch((e) => void 0);
 
-        await navigationPromise;
-
-        let pagesToScrape = await page.evaluate(() => {
-          // pegar o numero de paginas
-          if (document.querySelector('#content-core > ul > li:nth-last-child(2)')) {
-            return document.querySelector('#content-core > ul > li:nth-last-child(2)').innerText;
-          } else {
-            return;
-          }
-        });
-        // console.log('pagesToScrape:', pagesToScrape);
-
-        await navigationPromise;
-
-        let currentPage = 1;
-        let urls = [];
-
-        if (!pagesToScrape) {
-          pagesToScrape = 1;
-        }
-
-        while (currentPage <= pagesToScrape) {
-          let discourseList = await page.evaluate(() => {
-            let discourseArticleList = [];
-            let items = document.querySelectorAll('#content-core a.summary.url');
-            items.forEach((item) => {
-              discourseArticleList.push({
-                url: item.href,
-              });
-            });
-            return discourseArticleList;
-          });
-
-          urls = urls.concat(discourseList);
-
-          if (currentPage < pagesToScrape) {
-            try {
-              await page.waitForSelector('#content-core > ul > li:last-child'),
-                await Promise.all([
-                  await page.click('#content-core > ul > li:last-child'),
-                  await page.waitForSelector('#content-core a.summary.url'),
-                ]);
-            } catch (error) {
-              return;
-            }
-          }
-          currentPage++;
-          // console.log('currentPage:', currentPage);
-
-          console.log(urls);
-        }
-      }
       await navigationPromise;
 
-      // for (let k = 0; k < urls.length; k++) {
-      //   let articleLink = urls[k];
+      let pagesToScrape = await page.evaluate(() => {
+        // pegar o numero de paginas
+        if (document.querySelector('#content-core > ul > li:nth-last-child(2)')) {
+          return document.querySelector('#content-core > ul > li:nth-last-child(2)').innerText;
+        } else {
+          return;
+        }
+      });
+      // console.log('pagesToScrape:', pagesToScrape);
+
+      await navigationPromise;
+
+      let currentPage = 1;
+      let urls = [];
+
+      if (!pagesToScrape) {
+        pagesToScrape = 1;
+      }
+
+      while (currentPage <= pagesToScrape) {
+        let discourseList = await page.evaluate(() => {
+          let discourseArticleList = [];
+          let items = document.querySelectorAll('#content-core a.summary.url');
+          items.forEach((item) => {
+            discourseArticleList.push(item.href);
+          });
+          return discourseArticleList;
+        });
+
+        urls = urls.concat(discourseList);
+
+        if (currentPage < pagesToScrape) {
+          try {
+            await page.waitForSelector('#content-core > ul > li:last-child'),
+              await Promise.all([
+                await page.click('#content-core > ul > li:last-child'),
+                await page.waitForSelector('#content-core a.summary.url'),
+              ]);
+          } catch (error) {
+            return;
+          }
+        }
+        currentPage++;
+        // console.log('currentPage:', currentPage);
+
+        // console.table(urls);
+        // console.dir(urls, { maxArrayLength: null });
+      }
       // }
+      await navigationPromise;
+
+      for (let k = 0; k < urls.length; k++) {
+        let articleLink = urls[k];
+
+        await page.goto(`${articleLink}`, { waitUntil: 'networkidle2' }).catch((e) => void 0);
+
+        await navigationPromise;
+
+        let discourseData = await page.evaluate(async () => {
+          if (document.querySelector('#content-core > p > a')) {
+            // pdf
+            await page.click(document.querySelector('#content-core > p > a').href);
+          } else if (document.querySelector('#content-core div')) {
+            // texto no site
+            return {
+              title: document
+                .querySelector('#breadcrumbs-6')
+                .innerText.replace(/[^a-zA-Z0-9]/g, '')
+                .toLowerCase(),
+              discourseText: document.querySelector('#content-core div').innerText,
+            };
+          }
+        });
+
+        function cb(err) {
+          console.error(err);
+        }
+
+        function writeFile(path, contents, cb) {
+          fs.mkdir(
+            getDirName(path),
+            {
+              recursive: true,
+            },
+            function (err) {
+              if (err) return cb(err);
+
+              fs.writeFile(path, contents, cb);
+            }
+          );
+        }
+
+        writeFile('./discourses/' + discourseData.title + '_.txt', discourseData.discourseText, cb);
+      }
     }
   }
 
