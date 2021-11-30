@@ -1,12 +1,15 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+const { info } = require('console');
 
 (async () => {
   let getDirName = require('path').dirname;
-  const browser = await puppeteer.launch({ ignoreHTTPSErrors: true });
-  // const browser = await puppeteer.launch({ ignoreHTTPSErrors: true, headless: false });
+  // const browser = await puppeteer.launch({ ignoreHTTPSErrors: true });
+  const browser = await puppeteer.launch({ ignoreHTTPSErrors: true, headless: false });
   const page = await browser.newPage();
-  const navigationPromise = page.waitForNavigation();
+  const navigationPromise = page.waitForNavigation({
+    waitUntil: 'networkidle0',
+  });
 
   // const url = `http://www.biblioteca.presidencia.gov.br/presidencia/ex-presidentes`;
   const url = `http://www.biblioteca.presidencia.gov.br/mapadosite`;
@@ -51,7 +54,7 @@ const fs = require('fs');
 
   // console.log(linksList);
 
-  for (let i = 0; i < linksList.length; i++) {
+  for (let i = 1; i < linksList.length; i++) {
     // for (let i = 1; i < 2; i++) {
     const link = linksList[i];
     await page.goto(`${link.url}`, { waitUntil: 'networkidle2' }).catch((e) => void 0);
@@ -167,33 +170,39 @@ const fs = require('fs');
           .catch(async (e) => await page.reload(`${articleLink}`));
 
         await navigationPromise;
+        try {
+          if (await page.$('#content-core > p > a')) {
+            // pdf
+            await page._client.send('Page.setDownloadBehavior', {
+              behavior: 'allow',
+              downloadPath: downloadPath,
+            });
 
-        let discourseData = await page.evaluate(async () => {
-          // await page.waitForSelector('#content-core > p > a');
-          try {
-            if (document.querySelector('#content-core > p > a')) {
-              // pdf
-              await page.click(document.querySelector('#content-core > p > a').href);
-              await navigationPromise;
-            } else if (document.querySelector('#content-core div')) {
-              // texto no site
-              return {
-                presidentName: document
-                  .querySelector('#breadcrumbs-3 a')
-                  .innerText.replace(/ /g, '')
-                  .toLowerCase(),
-                title: document
-                  .querySelector('#breadcrumbs-6')
-                  .innerText.replace(/[^a-zA-Z0-9]/g, '')
-                  .toLowerCase(),
-                discourseText: document.querySelector('#content-core div').innerText,
-              };
-            }
-          } catch (e) {
-            await page.reload(`${articleLink}`);
-            return;
+            await page.click('#content-core > p > a');
+            await navigationPromise;
+          } else if (await page.$('#content-core div')) {
+            // in text html
+            const presidentName = await page.evaluate(() => {
+              return document.querySelector('#breadcrumbs-3 a').innerText;
+            });
+            const articleTitle = await page.evaluate(() => {
+              return document.querySelector('#breadcrumbs-6').innerText;
+            });
+            const speechText = await page.evaluate(() => {
+              return document.querySelector('#content-core div').innerText;
+            });
+
+            writeFile(
+              './speeches/' +
+                presidentName.replace(/ /g, '').toLowerCase() +
+                '/' +
+                articleTitle.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() +
+                '_.txt',
+              speechText,
+              cb
+            );
           }
-        });
+        } catch (e) {}
 
         function cb(err) {
           console.error(err);
@@ -212,12 +221,6 @@ const fs = require('fs');
             }
           );
         }
-
-        writeFile(
-          './speeches/' + discourseData.presidentName + '/' + discourseData.title + '_.txt',
-          discourseData.discourseText,
-          cb
-        );
       }
     }
   }
