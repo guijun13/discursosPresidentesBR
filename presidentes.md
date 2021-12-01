@@ -1,0 +1,44 @@
+- [x] Michel Temer
+- [x] Dilma Rousseff (index 0)
+- [x] Luiz Inácio Lula da Silva
+- [ ] Fernando H. Cardoso -> um loop a mais
+- [ ] Itamar Franco -> lista de anos dos 'discursos presidenciais' nao é uma "lista"
+- [x] Fernando Collor
+- [x] José Sarney
+- [x] Tancredo Neves
+- [x] João Baptista Figueiredo
+- [x] Ernesto Geisel
+- [x] Emílio Garrastazu Médici
+- [x] Márcio de Souza Mello
+- [x] Augusto Rademaker
+- [x] Aurélio Lyra Tavares
+- [x] Pedro Aleixo
+- [x] Arthur da Costa e Silva
+- [x] Castello Branco
+- [x] Paschoal Ranieri Mazzilli
+- [x] João Goulart
+- [x] Jânio Quadros
+- [x] Juscelino Kubitschek
+- [x] Nereu Ramos
+- [x] Carlos Luz
+- [ ] Café Filho
+- [x] Getúlio Vargas
+- [ ] Eurico Gaspar Dutra
+- [ ] José Linhares
+- [ ] Augusto Fragoso
+- [ ] Isaías de Noronha
+- [ ] Menna Barreto
+- [ ] Júlio Prestes
+- [ ] Washington Luís
+- [ ] Arthur Bernardes
+- [ ] Epitácio Pessoa
+- [ ] Delfim Moreira
+- [ ] Wenceslau Braz
+- [ ] Hermes Fonseca
+- [ ] Nilo Peçanha
+- [ ] Affonso Penna
+- [ ] Rodrigues Alves
+- [ ] Campos Salles
+- [ ] Prudente de Moraes
+- [ ] Floriano Peixoto
+- [ ] Deodoro da Fonseca
