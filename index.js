@@ -10,51 +10,37 @@ const fs = require('fs');
     waitUntil: 'networkidle0',
   });
 
-  // const url = `http://www.biblioteca.presidencia.gov.br/presidencia/ex-presidentes`;
-  const url = `http://www.biblioteca.presidencia.gov.br/mapadosite`;
+  const url = `http://www.biblioteca.presidencia.gov.br/presidencia/ex-presidentes`;
+  // const url = `http://www.biblioteca.presidencia.gov.br/mapadosite`;
   await page.goto(url, { waitUntil: 'networkidle2' }).catch((e) => void 0);
 
   await navigationPromise;
 
   // await page.waitForSelector(
-  //   '#portal-column-content #content .row .cell .tile-default .tile-content a'
+  //   '#portal-sitemap > li:nth-child(10) > ul > li:nth-child(1) > ul > li > div'
   // );
-  // await page.click('#portal-column-content #content .row .cell .tile-default .tile-content a');
 
-  await page.waitForSelector(
-    '#portal-sitemap > li:nth-child(10) > ul > li:nth-child(1) > ul > li > div'
-  );
+  await page.waitForSelector('#content');
 
   await navigationPromise;
-  // await page.click('#portal-sitemap > li:nth-child(10) > ul > li:nth-child(1) > ul > li > div > a');
-
-  // await page.waitForSelector(
-  //   'div > ul > li > span > span > span > span > span > span > span > span > span > span > span > span > a'
-  // );
-  // await page.click(
-  //   'div > ul > li > span > span > span > span > span > span > span > span > span > span > span > span > a'
-  // );
-
-  // await page.waitForSelector('#content-core > article:nth-child(1) > div > h2 > a');
-  // await page.click('#content-core > article:nth-child(1) > div > h2 > a');
 
   const linksList = await page.evaluate(() => {
     const results = [];
-    const items = document.querySelectorAll(
-      '#portal-sitemap > li:nth-child(10) > ul > li:nth-child(1) > ul > li > div'
-    );
+    // sitemap
+    // const items = document.querySelectorAll(
+    //   '#portal-sitemap > li:nth-child(10) > ul > li:nth-child(1) > ul > li > div'
+    // );
+    const items = document.querySelectorAll('#content a');
     items.forEach((item) => {
       results.push({
-        url: item.children[0].href,
+        // url: item.children[0].href,
+        url: item.href,
       });
     });
     return results;
   });
 
-  // console.log(linksList);
-
-  for (let i = 2; i < linksList.length; i++) {
-    // for (let i = 1; i < 2; i++) {
+  for (let i = 0; i < linksList.length; i++) {
     const link = linksList[i];
     await page.goto(`${link.url}`, { waitUntil: 'networkidle2' }).catch((e) => void 0);
     await navigationPromise;
@@ -73,7 +59,9 @@ const fs = require('fs');
               i.href !=
                 'https://editarcms.presidencia.gov.br/cobib_idg/presidencia/ex-presidentes/costa-silva/resolveuid/5fc9a0e0f68f426f835db4398fd78bfc' &&
               i.href !=
-                'https://editarcms.presidencia.gov.br/cobib_idg/presidencia/ex-presidentes/costa-silva/resolveuid/ad9e5d2925084ab89070a5d67e60d285'
+                'https://editarcms.presidencia.gov.br/cobib_idg/presidencia/ex-presidentes/costa-silva/resolveuid/ad9e5d2925084ab89070a5d67e60d285' &&
+              i.href !=
+                'https://editarcms.presidencia.gov.br/cobib_idg/presidencia/ex-presidentes/itamar-franco/resolveuid/42f4c6ad2a154818b6e9c51f058fe6e3'
             ) {
               yearsLinks.push({
                 url: i.href,
@@ -201,7 +189,9 @@ const fs = require('fs');
               return document.querySelector('#breadcrumbs-3 a').innerText;
             });
             const articleTitle = await page.evaluate(() => {
-              return document.querySelector('#breadcrumbs-6').innerText;
+              return document.querySelector('#breadcrumbs-6') != null
+                ? document.querySelector('#breadcrumbs-6').innerText
+                : document.querySelector('#breadcrumbs-5').innerText;
             });
             const speechText = await page.evaluate(() => {
               return document.querySelector('#content-core div').innerText;
@@ -217,8 +207,8 @@ const fs = require('fs');
               cb
             );
           }
-        } catch (e) {
-          console.error(e);
+        } catch (err) {
+          console.error(err ? 'deu ruim' : 'deu bom');
         }
 
         function cb(err) {

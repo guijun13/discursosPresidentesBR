@@ -1,6 +1,4 @@
 const fs = require('fs');
-const PDFParser = require('pdf2json');
-const crawler = require('crawler-request');
 const pdf = require('pdf-parse');
 const path = require('path');
 
@@ -10,7 +8,7 @@ const moveFrom = __dirname + '/pdfs/';
 const moveTo = __dirname + '/pdf-txt-teste/';
 
 function cb(err) {
-  console.error(err ? 'deu bom' : 'deu ruim');
+  console.error(err ? 'deu ruim' : 'deu bom');
 }
 
 function writeFile(path, contents, cb) {
@@ -30,10 +28,8 @@ function writeFile(path, contents, cb) {
 (async () => {
   try {
     const presidentesFolder = await fs.promises.readdir(moveFrom);
-    // console.log(presidentesFolder);
     for (const presidentes of presidentesFolder) {
       const yearsFolder = await fs.promises.readdir(moveFrom + `${presidentes}/`);
-      // console.log(yearsFolder);
       for (const year of yearsFolder) {
         const data = await fs.promises.readdir(moveFrom + `${presidentes}/${year}/`);
         for (const file of data) {
@@ -50,3 +46,23 @@ function writeFile(path, contents, cb) {
     console.error(e);
   }
 })();
+
+// have selected president name on 'moveFrom'
+// (async () => {
+//   try {
+//     const yearsFolder = await fs.promises.readdir(moveFrom);
+//     for (const year of yearsFolder) {
+//       const data = await fs.promises.readdir(moveFrom + `${year}/`);
+//       for (const file of data) {
+//         const fromPath = path.join(moveFrom + `${year}/`, file);
+//         const toPath = path.join(moveTo + `${year}/`, file);
+//         let dataBuffer = fs.readFileSync(fromPath);
+//         pdf(dataBuffer).then(function (data) {
+//           writeFile(toPath, data.text, cb);
+//         });
+//       }
+//     }
+//   } catch (e) {
+//     console.error(e);
+//   }
+// })();
