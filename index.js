@@ -1,6 +1,5 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
-const { info } = require('console');
 
 (async () => {
   let getDirName = require('path').dirname;
@@ -54,7 +53,7 @@ const { info } = require('console');
 
   // console.log(linksList);
 
-  for (let i = 1; i < linksList.length; i++) {
+  for (let i = 2; i < linksList.length; i++) {
     // for (let i = 1; i < 2; i++) {
     const link = linksList[i];
     await page.goto(`${link.url}`, { waitUntil: 'networkidle2' }).catch((e) => void 0);
@@ -173,9 +172,25 @@ const { info } = require('console');
         try {
           if (await page.$('#content-core > p > a')) {
             // pdf
+            const presidentName = await page.evaluate(() => {
+              return document.querySelector('#breadcrumbs-3 a').innerText;
+            });
+            const articleYear = await page.evaluate(() => {
+              return parseInt(document.querySelector('#breadcrumbs-5 > a').innerText) > 1000
+                ? document.querySelector('#breadcrumbs-5 > a').innerText
+                : document.querySelector('#breadcrumbs-6 > a').innerText;
+            });
+            // console.log(presidentName + articleYear);
+
             await page._client.send('Page.setDownloadBehavior', {
               behavior: 'allow',
-              downloadPath: downloadPath,
+              downloadPath:
+                __dirname +
+                '/pdfs/' +
+                presidentName.replace(/ /g, '').toLowerCase() +
+                '/' +
+                articleYear +
+                '/',
             });
 
             await page.click('#content-core > p > a');
@@ -202,7 +217,9 @@ const { info } = require('console');
               cb
             );
           }
-        } catch (e) {}
+        } catch (e) {
+          console.error(e);
+        }
 
         function cb(err) {
           console.error(err);

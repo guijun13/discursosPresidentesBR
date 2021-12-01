@@ -1,4 +1,6 @@
 node_modules
 *.txt
 discourses
-test.js
+pdfs
+pdf-txt
+*.zip
