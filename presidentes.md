@@ -1,3 +1,4 @@
+- [x] Jair Bolsonaro
 - [x] Michel Temer
 - [x] Dilma Rousseff (index 0)
 - [x] Luiz Inácio Lula da Silva
