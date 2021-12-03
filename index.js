@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+const _ = require('lodash');
 
 (async () => {
   let getDirName = require('path').dirname;
@@ -40,7 +41,7 @@ const fs = require('fs');
     return results;
   });
 
-  for (let i = 0; i < linksList.length; i++) {
+  for (let i = 2; i < linksList.length; i++) {
     const link = linksList[i];
     await page.goto(`${link.url}`, { waitUntil: 'networkidle2' }).catch((e) => void 0);
     await navigationPromise;
@@ -198,11 +199,12 @@ const fs = require('fs');
             });
 
             writeFile(
-              './speeches/' +
-                presidentName.replace(/ /g, '').toLowerCase() +
-                '/' +
-                articleTitle.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() +
-                '_.txt',
+              // './speeches/' +
+              //   presidentName.replace(/ /g, '').toLowerCase() +
+              //   '/' +
+              //   articleTitle.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() +
+              //   '_.txt',
+              `standardSpeeches/${_.camelCase(presidentName)}_${k}.txt`,
               speechText,
               cb
             );

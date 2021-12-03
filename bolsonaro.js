@@ -71,13 +71,7 @@ const fs = require('fs');
         return document.querySelector('.documentFirstHeading').innerText;
       });
 
-      writeFile(
-        './speeches/jairbolsonaro/' +
-          speechTitle.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() +
-          '_.txt',
-        speechText,
-        cb
-      );
+      writeFile(`./speeches/jairbolsonaro2/jairBolsonaro_${i}.txt`, speechText, cb);
     } catch (e) {
       console.error(e);
     }
