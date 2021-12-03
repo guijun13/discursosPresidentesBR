@@ -1,6 +1,6 @@
 - [x] Jair Bolsonaro
-- [x] Michel Temer
-- [x] Dilma Rousseff (index 0)
+- [x] Michel Temer (index 0)
+- [x] Dilma Rousseff 
 - [x] Luiz Inácio Lula da Silva
 - [ ] Fernando H. Cardoso -> um loop a mais
 - [ ] Itamar Franco -> lista de anos dos 'discursos presidenciais' nao é uma "lista"
