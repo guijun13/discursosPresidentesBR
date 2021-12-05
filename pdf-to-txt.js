@@ -4,8 +4,8 @@ const path = require('path');
 
 let getDirName = require('path').dirname;
 
-const moveFrom = __dirname + '/pdfs/';
-const moveTo = __dirname + '/pdf-txt-teste/';
+const moveFrom = __dirname + '/pdfs/itamarfranco/';
+const moveTo = __dirname + '/pdf-txt/';
 
 function cb(err) {
   console.error(err ? 'deu ruim' : 'deu bom');
