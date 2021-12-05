@@ -41,20 +41,19 @@ const _ = require('lodash');
     return results;
   });
 
-  for (let i = 2; i < linksList.length; i++) {
+  // aqui altera o index dos presidentes (ver presidentes.md)
+  for (let i = 0; i < linksList.length; i++) {
     const link = linksList[i];
     await page.goto(`${link.url}`, { waitUntil: 'networkidle2' }).catch((e) => void 0);
     await navigationPromise;
 
-    const discoursesResults = await page.evaluate(() => {
+    let discoursesResults = await page.evaluate(() => {
       const yearsLinks = [];
       if (document.querySelectorAll('#f0046f8a875947359dac10a807564bc3')) {
         // tem a parte de 'Discursos presidenciais'
-        if (document.querySelector('#f84b41b10df14a67a7250c2b2bf06c07 > div > ul > li')) {
+        if (document.querySelectorAll('#f84b41b10df14a67a7250c2b2bf06c07 > div a').length > 1) {
           // tem uma lista de anos
-          const itens = document.querySelectorAll(
-            '#f84b41b10df14a67a7250c2b2bf06c07 > div > ul > li a'
-          );
+          const itens = document.querySelectorAll('#f84b41b10df14a67a7250c2b2bf06c07 > div a');
           itens.forEach((i) => {
             if (
               i.href !=
@@ -80,6 +79,35 @@ const _ = require('lodash');
       }
     });
 
+    // se for o pres. FHC, tem q fazer uma manipulacao especial
+    if (
+      discoursesResults ==
+      'http://www.biblioteca.presidencia.gov.br/presidencia/ex-presidentes/fernando-henrique-cardoso/discursos/discursos'
+    ) {
+      await page.goto(
+        'http://www.biblioteca.presidencia.gov.br/presidencia/ex-presidentes/fernando-henrique-cardoso/discursos/discursos'
+      );
+
+      await page.waitForSelector('#parent-fieldname-text');
+
+      let speechYearsFHC = await page.evaluate(() => {
+        const yearsLinksFHC = [];
+        const links = document.querySelectorAll('#parent-fieldname-text > ul > li a');
+        links.forEach((link) => {
+          yearsLinksFHC.push({
+            url: link.href,
+          });
+        });
+        return yearsLinksFHC;
+      });
+
+      console.log(speechYearsFHC);
+
+      discoursesResults = speechYearsFHC;
+    }
+
+    console.log(discoursesResults);
+
     let lenDiscoursesResults;
     if (discoursesResults) {
       if (discoursesResults.length > 1) {
@@ -93,8 +121,6 @@ const _ = require('lodash');
 
     for (let j = 0; j < lenDiscoursesResults; j++) {
       let link = discoursesResults[j];
-      // if (link.url != null && link.url != undefined) {
-      // console.log(`${link.url}`);
       await page.goto(`${link.url}`, { waitUntil: 'networkidle2' }).catch((e) => void 0);
 
       await navigationPromise;
@@ -107,7 +133,6 @@ const _ = require('lodash');
           return;
         }
       });
-      // console.log('pagesToScrape:', pagesToScrape);
 
       await navigationPromise;
 
@@ -142,12 +167,7 @@ const _ = require('lodash');
           }
         }
         currentPage++;
-        // console.log('currentPage:', currentPage);
-
-        // console.table(urls);
-        // console.dir(urls, { maxArrayLength: null });
       }
-      // }
       await navigationPromise;
 
       for (let k = 0; k < urls.length; k++) {
@@ -169,7 +189,6 @@ const _ = require('lodash');
                 ? document.querySelector('#breadcrumbs-5 > a').innerText
                 : document.querySelector('#breadcrumbs-6 > a').innerText;
             });
-            // console.log(presidentName + articleYear);
 
             await page._client.send('Page.setDownloadBehavior', {
               behavior: 'allow',
@@ -198,16 +217,7 @@ const _ = require('lodash');
               return document.querySelector('#content-core div').innerText;
             });
 
-            writeFile(
-              // './speeches/' +
-              //   presidentName.replace(/ /g, '').toLowerCase() +
-              //   '/' +
-              //   articleTitle.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() +
-              //   '_.txt',
-              `standardSpeeches/${_.camelCase(presidentName)}_${k}.txt`,
-              speechText,
-              cb
-            );
+            writeFile(`standardSpeeches/${_.camelCase(presidentName)}_${k}.txt`, speechText, cb);
           }
         } catch (err) {
           console.error(err ? 'deu ruim' : 'deu bom');
