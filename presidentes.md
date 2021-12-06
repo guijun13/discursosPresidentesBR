@@ -2,8 +2,8 @@
 - [x] Michel Temer (index 0)
 - [x] Dilma Rousseff 
 - [x] Luiz Inácio Lula da Silva
-- [ ] Fernando H. Cardoso -> um loop a mais
-- [ ] Itamar Franco -> lista de anos dos 'discursos presidenciais' nao é uma "lista"
+- [x] Fernando H. Cardoso
+- [x] Itamar Franco
 - [x] Fernando Collor
 - [x] José Sarney
 - [x] Tancredo Neves
@@ -25,6 +25,8 @@
 - [ ] Café Filho
 - [x] Getúlio Vargas
 - [ ] Eurico Gaspar Dutra
+  
+Não tem discursos desses presidentes:
 - [ ] José Linhares
 - [ ] Augusto Fragoso
 - [ ] Isaías de Noronha
