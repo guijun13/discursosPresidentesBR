@@ -42,7 +42,7 @@ const _ = require('lodash');
   });
 
   // aqui altera o index dos presidentes (ver presidentes.md)
-  for (let i = 0; i < linksList.length; i++) {
+  for (let i = 25; i < linksList.length; i++) {
     const link = linksList[i];
     await page.goto(`${link.url}`, { waitUntil: 'networkidle2' }).catch((e) => void 0);
     await navigationPromise;
@@ -73,6 +73,14 @@ const _ = require('lodash');
           // tem so 1 link
           return document.querySelector('#f84b41b10df14a67a7250c2b2bf06c07 > div a:first-child')
             .href;
+        } else if (document.querySelector('#deb109d1f040406289d97ebace0ee003')) {
+          const itens = document.querySelectorAll('#deb109d1f040406289d97ebace0ee003 a');
+          itens.forEach((i) => {
+            yearsLinks.push({
+              url: i.href,
+            });
+          });
+          return yearsLinks;
         }
       } else {
         return;
@@ -100,8 +108,6 @@ const _ = require('lodash');
         });
         return yearsLinksFHC;
       });
-
-      console.log(speechYearsFHC);
 
       discoursesResults = speechYearsFHC;
     }
