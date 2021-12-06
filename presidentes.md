@@ -9,7 +9,7 @@
 - [x] Tancredo Neves
 - [x] João Baptista Figueiredo
 - [x] Ernesto Geisel
-- [x] Emílio Garrastazu Médici
+- [x] Emílio Garrastazu Médici (index 10)
 - [x] Márcio de Souza Mello
 - [x] Augusto Rademaker
 - [x] Aurélio Lyra Tavares
@@ -19,12 +19,12 @@
 - [x] Paschoal Ranieri Mazzilli
 - [x] João Goulart
 - [x] Jânio Quadros
-- [x] Juscelino Kubitschek
+- [x] Juscelino Kubitschek (index 20)
 - [x] Nereu Ramos
 - [x] Carlos Luz
-- [ ] Café Filho
+- [x] Café Filho
 - [x] Getúlio Vargas
-- [ ] Eurico Gaspar Dutra
+- [x] Eurico Gaspar Dutra
   
 Não tem discursos desses presidentes:
 - [ ] José Linhares
