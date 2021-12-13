@@ -4,37 +4,32 @@ const _ = require('lodash');
 
 (async () => {
   let getDirName = require('path').dirname;
+
+  // if you want headless (run only on the terminal)
   // const browser = await puppeteer.launch({ ignoreHTTPSErrors: true });
+
+  // if you want to see the action happening (chrome brownser opens and run the crawler)
   const browser = await puppeteer.launch({ ignoreHTTPSErrors: true, headless: false });
+
   const page = await browser.newPage();
   const navigationPromise = page.waitForNavigation({
     waitUntil: 'networkidle0',
   });
 
   const url = `http://www.biblioteca.presidencia.gov.br/presidencia/ex-presidentes`;
-  // const url = `http://www.biblioteca.presidencia.gov.br/mapadosite`;
   await page.goto(url, { waitUntil: 'networkidle2' }).catch((e) => void 0);
 
   await navigationPromise;
-
-  // await page.waitForSelector(
-  //   '#portal-sitemap > li:nth-child(10) > ul > li:nth-child(1) > ul > li > div'
-  // );
 
   await page.waitForSelector('#content');
 
   await navigationPromise;
 
-  const linksList = await page.evaluate(() => {
+  const presidentsMainURLList = await page.evaluate(() => {
     const results = [];
-    // sitemap
-    // const items = document.querySelectorAll(
-    //   '#portal-sitemap > li:nth-child(10) > ul > li:nth-child(1) > ul > li > div'
-    // );
     const items = document.querySelectorAll('#content a');
     items.forEach((item) => {
       results.push({
-        // url: item.children[0].href,
         url: item.href,
       });
     });
@@ -42,12 +37,12 @@ const _ = require('lodash');
   });
 
   // aqui altera o index dos presidentes (ver presidentes.md)
-  for (let i = 25; i < linksList.length; i++) {
-    const link = linksList[i];
+  for (let i = 2; i < presidentsMainURLList.length; i++) {
+    const link = presidentsMainURLList[i];
     await page.goto(`${link.url}`, { waitUntil: 'networkidle2' }).catch((e) => void 0);
     await navigationPromise;
 
-    let discoursesResults = await page.evaluate(() => {
+    let speechesURLsList = await page.evaluate(() => {
       const yearsLinks = [];
       if (document.querySelectorAll('#f0046f8a875947359dac10a807564bc3')) {
         // tem a parte de 'Discursos presidenciais'
@@ -89,7 +84,7 @@ const _ = require('lodash');
 
     // se for o pres. FHC, tem q fazer uma manipulacao especial
     if (
-      discoursesResults ==
+      speechesURLsList ==
       'http://www.biblioteca.presidencia.gov.br/presidencia/ex-presidentes/fernando-henrique-cardoso/discursos/discursos'
     ) {
       await page.goto(
@@ -109,24 +104,22 @@ const _ = require('lodash');
         return yearsLinksFHC;
       });
 
-      discoursesResults = speechYearsFHC;
+      speechesURLsList = speechYearsFHC;
     }
 
-    console.log(discoursesResults);
-
-    let lenDiscoursesResults;
-    if (discoursesResults) {
-      if (discoursesResults.length > 1) {
-        lenDiscoursesResults = discoursesResults.length;
+    let lenghtSpeechesURLsList;
+    if (speechesURLsList) {
+      if (speechesURLsList.length > 1) {
+        lenghtSpeechesURLsList = speechesURLsList.length;
       } else {
-        lenDiscoursesResults = 1;
+        lenghtSpeechesURLsList = 1;
       }
     }
 
     await navigationPromise;
 
-    for (let j = 0; j < lenDiscoursesResults; j++) {
-      let link = discoursesResults[j];
+    for (let j = 0; j < lenghtSpeechesURLsList; j++) {
+      let link = speechesURLsList[j];
       await page.goto(`${link.url}`, { waitUntil: 'networkidle2' }).catch((e) => void 0);
 
       await navigationPromise;
@@ -150,16 +143,16 @@ const _ = require('lodash');
       }
 
       while (currentPage <= pagesToScrape) {
-        let discourseList = await page.evaluate(() => {
-          let discourseArticleList = [];
+        let speechesList = await page.evaluate(() => {
+          let speechTextList = [];
           let items = document.querySelectorAll('#content-core a.summary.url');
           items.forEach((item) => {
-            discourseArticleList.push(item.href);
+            speechTextList.push(item.href);
           });
-          return discourseArticleList;
+          return speechTextList;
         });
 
-        urls = urls.concat(discourseList);
+        urls = urls.concat(speechesList);
 
         if (currentPage < pagesToScrape) {
           try {
@@ -174,6 +167,7 @@ const _ = require('lodash');
         }
         currentPage++;
       }
+
       await navigationPromise;
 
       for (let k = 0; k < urls.length; k++) {
@@ -249,8 +243,6 @@ const _ = require('lodash');
       }
     }
   }
-
-  // await navigationPromise;
 
   await browser.close();
 })();
