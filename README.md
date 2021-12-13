@@ -13,4 +13,10 @@ Web scraping project to collect all brazilian presidents speeches from [Bibliote
 ## Usage:
 * `git clone` the project
 * Install all dependencies using `npm install`
-* Run the main project using: `node main.js`
+* Run the main project using: `node index.js` for past presidents (before Bolsonaro)
+  * They will have this folder pattern: pdfs/fernandocollor/1990/01.pdf
+* Run the `bolsonaro.js` project (`node bolsonaro.js`) to collect all Bolsonaro speeches
+
+### Optional:
+* After running the main and bolsonaro files, approximately 80% of the data collected was pdf. Use the `pdf-to-txt.js` to extract the text data from the pdf file.
+* Use the `rename-files.js` to rename the files to a certain pattern (such as cafeFilho10.txt, meaning the 11th (because starts with 0) Café Filho speech).
