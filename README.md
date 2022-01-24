@@ -4,7 +4,7 @@ Web scraping project to collect all brazilian presidents speeches from [Bibliote
 
 ## Technologies:
 * [Node.js](https://nodejs.org/)
-* [Puppteer](https://pptr.dev/)
+* [Puppeteer](https://pptr.dev/)
 
 ## Pre requisites:
 * Node.js 12+ version
